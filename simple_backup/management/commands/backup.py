@@ -148,7 +148,8 @@ class Command(BaseCommand):
         if not options['without_media']:
             maybe_print("Backing up uploaded files from %s" % settings.MEDIA_ROOT, options['verbosity'])
             #copy the uploaded media to the temp directory
-            shutil.copytree(settings.MEDIA_ROOT, collect_dir)
+            dest_dir = os.path.join(collect_dir, os.path.basename(settings.MEDIA_ROOT))
+            shutil.copytree(settings.MEDIA_ROOT, dest_dir)
 
         # Doing backup
         if not options['without_db']:
@@ -162,7 +163,7 @@ class Command(BaseCommand):
         comments = list()
         for directory in options['directories']:
             maybe_print("Backing up directory %s" % directory, options['verbosity'])
-            destdir = get_safe_dirname(collect_dir, directory)
+            destdir = get_safe_dirname(directory)
             shutil.copytree(directory, os.path.join(collect_dir, destdir))
             comments.append('Directory %s copied to %s' % (directory, destdir))
 
@@ -175,7 +176,7 @@ class Command(BaseCommand):
         #compress backup
         maybe_print('Compressing backup file', options['verbosity'])
         outfile = os.path.join(temp_dir, backup_name + '.tar.gz')
-        os.system('tar -czf %s %s' % (outfile, collect_dir))
+        os.system('cd %s && tar -czf %s %s' % (temp_dir, outfile, backup_name))
 
         #move file to the final location
         backups_dir = getattr(settings, 'SIMPLE_BACKUP_DIRECTORY', 'backups')
