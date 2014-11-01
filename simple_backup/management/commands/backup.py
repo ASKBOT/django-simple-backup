@@ -9,6 +9,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand, CommandError
 from django.core.mail import EmailMessage
 from django.conf import settings
+from simple_backup.signals import backup_ready
 
 def maybe_print(text, verbosity):
     if verbosity:
